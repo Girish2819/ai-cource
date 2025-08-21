@@ -2,35 +2,36 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-
 import streamlit as st
-import os 
+import os
 from dotenv import load_dotenv
 
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-##langsmith tracing 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
+# Load environment variables from .env (works locally)
+load_dotenv()
 
-##pront template
+# LangSmith tracing (optional)
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
+
+# Prompt template
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", "You are a helpful assistant. Please respnd to the user  queries")
-        ("user","Question: {question}")
+        ("system", "You are a helpful assistant. Please respond to the user queries"),
+        ("user", "Question: {question}")
     ]
 )
 
-##streamlight framework
+# Streamlit UI
 st.title("LangChain Demo With OpenAI API")
 input_text = st.text_input("Enter your question here")
 
-##openAI LLm
-
+# OpenAI LLM
 llm = ChatOpenAI(
-    model="gpt-3.5-turbo")
+    model="gpt-3.5-turbo",
+    api_key=os.getenv("OPENAI_API_KEY")  # safer than forcing into os.environ
+)
 output_parser = StrOutputParser()
 chain = prompt | llm | output_parser
 
-
 if input_text:
-    st,write(chain.invoke({'question': input_text}))
+    st.write(chain.invoke({'question': input_text}))
